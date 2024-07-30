@@ -79,6 +79,10 @@
                                     <artifact>*:*</artifact>
                                     <excludes>
                                         <exclude>META-INF/**</exclude>
+                                        <exclude>assets/**</exclude>
+                                        <exclude>license/**</exclude>
+                                        <exclude>font_metrics.properties</exclude>
+                                        <exclude>Log4j-charsets.properties</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
