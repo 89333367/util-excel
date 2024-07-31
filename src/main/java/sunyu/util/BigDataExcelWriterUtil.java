@@ -236,8 +236,12 @@ public class BigDataExcelWriterUtil implements Serializable, Closeable {
             log.debug("清理临时序列化文件");
             tmpSerializeFilePath.parallelStream().forEach(filePath -> {
                 //log.debug("清理 {}", filePath);
-                FileUtil.del(filePath);
+                try {
+                    FileUtil.del(filePath);
+                } catch (IORuntimeException e) {
+                }
             });
+            tmpSerializeFilePath.clear();
         }
         log.debug("写出文件完毕 {}", destFile.getAbsolutePath());
     }
