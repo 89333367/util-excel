@@ -1,7 +1,6 @@
 package sunyu.util;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
 import cn.hutool.poi.excel.BigExcelWriter;
@@ -19,52 +18,9 @@ import java.util.stream.Collectors;
 public class BigDataExcelWriterUtil implements Serializable, Closeable {
     private Log log = LogFactory.get();
 
-    /**
-     * 获得工具类工厂
-     *
-     * @return
-     */
-    public static BigDataExcelWriterUtil builder() {
-        return new BigDataExcelWriterUtil();
-    }
-
-    /**
-     * 构建工具类
-     *
-     * @return
-     */
-    public BigDataExcelWriterUtil build() {
-        if (destFile == null) {
-            destFile = FileUtil.file("temp.xlsx");
-        }
-        if (sheetName == null) {
-            sheetName = "Sheet";
-        }
-        return this;
-    }
-
-    /**
-     * 回收资源，等待sql缓存和所有线程队列执行完毕
-     */
-    @Override
-    public void close() {
-        counter = 0;
-        rows.clear();
-        headers.clear();
-        //log.debug("清理临时序列化文件");
-        tmpSerializeFilePath.parallelStream().forEach(filePath -> {
-            //log.debug("清理 {}", filePath);
-            try {
-                FileUtil.del(filePath);
-            } catch (IORuntimeException e) {
-            }
-        });
-        tmpSerializeFilePath.clear();
-    }
-
 
     //表头，key是用来找数据对应的值，value用来展示表头信息
-    private LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+    private volatile LinkedHashMap<String, String> headers = new LinkedHashMap<>();
     //每Sheet最大数据行数
     private int pageSize = 1000000;
     //数据缓存行数，配置越大越费内存
@@ -74,11 +30,11 @@ public class BigDataExcelWriterUtil implements Serializable, Closeable {
     //写出文件
     private File destFile;
     //每一行数据
-    private List<List<Object>> rows = new ArrayList<>();
+    private volatile List<List<Object>> rows = new ArrayList<>();
     //临时记录序列化文件路径
-    private List<String> tmpSerializeFilePath = new ArrayList<>();
+    private volatile List<String> tmpSerializeFilePath = new ArrayList<>();
     //写出数据行数计数器
-    private int counter = 0;
+    private volatile int counter = 0;
 
 
     /**
@@ -233,15 +189,17 @@ public class BigDataExcelWriterUtil implements Serializable, Closeable {
         } catch (Exception e) {
             log.error(e);
         } finally {
-            log.debug("清理临时序列化文件");
+            log.debug("清理临时序列化文件开始");
             tmpSerializeFilePath.parallelStream().forEach(filePath -> {
-                //log.debug("清理 {}", filePath);
                 try {
+                    //log.debug("清理 {}", filePath);
                     FileUtil.del(filePath);
-                } catch (IORuntimeException e) {
+                } catch (Exception e) {
+                    log.warn(e.getMessage());
                 }
             });
             tmpSerializeFilePath.clear();
+            log.debug("清理临时序列化文件结束");
         }
         log.debug("写出文件完毕 {}", destFile.getAbsolutePath());
     }
@@ -302,5 +260,91 @@ public class BigDataExcelWriterUtil implements Serializable, Closeable {
         }
         return rows;
     }
+
+
+    /**
+     * 私有构造，避免外部初始化
+     */
+    private BigDataExcelWriterUtil() {
+    }
+
+    /**
+     * 获得工具类工厂
+     *
+     * @return
+     */
+    public static BigDataExcelWriterUtil builder() {
+        return new BigDataExcelWriterUtil();
+    }
+
+    /**
+     * 构建工具类
+     *
+     * @param destFile 目标文件
+     * @return
+     */
+    public BigDataExcelWriterUtil build(File destFile) {
+        log.info("构建工具类开始");
+        if (this.destFile != null) {
+            log.warn("工具类已构建，请不要重复构建");
+            return this;
+        }
+
+        log.info("配置目标路径开始");
+        if (destFile == null) {
+            this.destFile = FileUtil.file("temp.xlsx");
+        } else {
+            this.destFile = destFile;
+        }
+        log.info("配置目标路径结束 {}", this.destFile.getAbsolutePath());
+        log.info("配置Sheet名称开始");
+        if (sheetName == null) {
+            sheetName = "Sheet";
+        }
+        log.info("配置Sheet名称结束 {}", sheetName);
+        log.info("pageSize {}", pageSize);
+        log.info("cacheSize {}", cacheSize);
+        log.info("临时文件路径 {}", System.getProperty("java.io.tmpdir"));
+        log.info("构建工具类结束");
+        return this;
+    }
+
+    /**
+     * 构建工具类
+     *
+     * @return
+     */
+    public BigDataExcelWriterUtil build() {
+        return build(null);
+    }
+
+    /**
+     * 回收资源，等待sql缓存和所有线程队列执行完毕
+     */
+    @Override
+    public void close() {
+        log.info("销毁工具类开始");
+        log.info("清理临时序列化文件开始");
+        tmpSerializeFilePath.parallelStream().forEach(filePath -> {
+            try {
+                //log.debug("清理 {}", filePath);
+                FileUtil.del(filePath);
+            } catch (Exception e) {
+                log.warn(e.getMessage());
+            }
+        });
+        log.info("清理临时序列化文件完毕");
+
+        headers.clear();
+        pageSize = 1000000;
+        cacheSize = 5000;
+        sheetName = null;
+        destFile = null;
+        rows.clear();
+        tmpSerializeFilePath.clear();
+        counter = 0;
+        log.info("销毁工具类完毕");
+    }
+
 
 }
