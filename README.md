@@ -29,8 +29,8 @@
 @Test
 void t001() {
     BigDataExcelWriterUtil writerUtil = BigDataExcelWriterUtil.builder()
-            .setDestFile("d:/tmp/1.xlsx").setSheetName("Sheet")
-            .setPageSize(1000000).setCacheSize(5000)
+            .destFile("d:/tmp/1.xlsx").sheetName("Sheet")
+            .pageSize(1000000).cacheSize(5000)
             .build();
     //模拟多行数据
     for (int i = 0; i < 1000100; i++) {

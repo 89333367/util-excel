@@ -47,11 +47,11 @@ public class BigDataExcelWriterUtil implements Serializable, Closeable {
     /**
      * 设置每Sheet最大数据行数，超过行数会自动新建Sheet，默认1000000
      *
-     * @param pageSize
+     * @param size
      */
-    public BigDataExcelWriterUtil setPageSize(int pageSize) {
-        if (pageSize < this.pageSize) {
-            this.pageSize = pageSize;
+    public BigDataExcelWriterUtil pageSize(int size) {
+        if (size < this.pageSize) {
+            this.pageSize = size;
         }
         return this;
     }
@@ -59,40 +59,40 @@ public class BigDataExcelWriterUtil implements Serializable, Closeable {
     /**
      * 设置数据缓存行数，配置越大越费内存，默认5000
      *
-     * @param cacheSize
+     * @param size
      */
-    public BigDataExcelWriterUtil setCacheSize(int cacheSize) {
-        this.cacheSize = cacheSize;
+    public BigDataExcelWriterUtil cacheSize(int size) {
+        this.cacheSize = size;
         return this;
     }
 
     /**
      * 设置目标文件
      *
-     * @param destFile
+     * @param file
      */
-    public BigDataExcelWriterUtil setDestFile(File destFile) {
-        this.destFile = destFile;
+    public BigDataExcelWriterUtil destFile(File file) {
+        this.destFile = file;
         return this;
     }
 
     /**
      * 设置目标文件
      *
-     * @param destFile 全路径+文件名称+后缀名(/tmp/temp.xlsx)
+     * @param file 全路径+文件名称+后缀名(/tmp/temp.xlsx)
      */
-    public BigDataExcelWriterUtil setDestFile(String destFile) {
-        this.destFile = FileUtil.file(destFile);
+    public BigDataExcelWriterUtil destFile(String file) {
+        this.destFile = FileUtil.file(file);
         return this;
     }
 
     /**
      * 设置Sheet名称
      *
-     * @param sheetName
+     * @param name
      */
-    public BigDataExcelWriterUtil setSheetName(String sheetName) {
-        this.sheetName = sheetName;
+    public BigDataExcelWriterUtil sheetName(String name) {
+        this.sheetName = name;
         return this;
     }
 
