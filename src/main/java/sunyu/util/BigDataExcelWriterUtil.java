@@ -285,7 +285,7 @@ public class BigDataExcelWriterUtil implements Serializable, Closeable {
      */
     public BigDataExcelWriterUtil build(File destFile) {
         log.info("构建工具类开始");
-        if (this.destFile != null) {
+        if (destFile != null && this.destFile != null) {
             log.warn("工具类已构建，请不要重复构建");
             return this;
         }
