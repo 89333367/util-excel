@@ -285,16 +285,11 @@ public class BigDataExcelWriterUtil implements Serializable, Closeable {
      */
     public BigDataExcelWriterUtil build(File destFile) {
         log.info("构建工具类开始");
-        if (destFile != null && this.destFile != null) {
-            log.warn("工具类已构建，请不要重复构建");
-            return this;
-        }
-
         log.info("配置目标路径开始");
-        if (destFile == null) {
-            this.destFile = FileUtil.file("temp.xlsx");
-        } else {
+        if (destFile != null) {
             this.destFile = destFile;
+        } else if (this.destFile == null) {
+            this.destFile = FileUtil.file("temp.xlsx");
         }
         log.info("配置目标路径结束 {}", this.destFile.getAbsolutePath());
         log.info("配置Sheet名称开始");
