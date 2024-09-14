@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 public class BigDataExcelWriterUtil implements Serializable, Closeable {
     private Log log = LogFactory.get();
 
-
     //表头，key是用来找数据对应的值，value用来展示表头信息
     private volatile LinkedHashMap<String, String> headers = new LinkedHashMap<>();
     //每Sheet最大数据行数
