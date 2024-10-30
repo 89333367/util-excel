@@ -83,6 +83,7 @@
                                         <exclude>license/**</exclude>
                                         <exclude>font_metrics.properties</exclude>
                                         <exclude>Log4j-charsets.properties</exclude>
+                                        <exclude>log4j2.xml</exclude>
                                     </excludes>
                                 </filter>
                             </filters>

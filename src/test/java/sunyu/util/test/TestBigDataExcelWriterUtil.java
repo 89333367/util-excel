@@ -35,6 +35,7 @@ public class TestBigDataExcelWriterUtil {
         //写出文件
         writerUtil.write();
         writerUtil.close();
+        log.info("done");
     }
 
     @Test

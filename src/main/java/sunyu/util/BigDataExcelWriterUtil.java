@@ -7,6 +7,7 @@ import cn.hutool.poi.excel.BigExcelWriter;
 import cn.hutool.poi.excel.ExcelUtil;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -16,10 +17,10 @@ import java.util.stream.Collectors;
  * @author 孙宇
  */
 public class BigDataExcelWriterUtil implements Serializable, Closeable {
-    private Log log = LogFactory.get();
+    private final Log log = LogFactory.get();
 
     //表头，key是用来找数据对应的值，value用来展示表头信息
-    private volatile LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+    private final LinkedHashMap<String, String> headers = new LinkedHashMap<>();
     //每Sheet最大数据行数
     private int pageSize = 1000000;
     //数据缓存行数，配置越大越费内存
@@ -29,9 +30,9 @@ public class BigDataExcelWriterUtil implements Serializable, Closeable {
     //写出文件
     private File destFile;
     //每一行数据
-    private volatile List<List<Object>> rows = new ArrayList<>();
+    private final List<List<Object>> rows = new ArrayList<>();
     //临时记录序列化文件路径
-    private volatile List<String> tmpSerializeFilePath = new ArrayList<>();
+    private final List<String> tmpSerializeFilePath = new ArrayList<>();
     //写出数据行数计数器
     private volatile int counter = 0;
 
@@ -112,15 +113,15 @@ public class BigDataExcelWriterUtil implements Serializable, Closeable {
      * @param row
      */
     public void append(Map<String, Object> row) {
-        boolean headersIsChange = false;
+        boolean headersChanged = false;
         for (String k : row.keySet()) {
             if (!headers.containsKey(k)) {
                 headers.put(k, k);
 
-                headersIsChange = true;
+                headersChanged = true;
             }
         }
-        if (headersIsChange) {
+        if (headersChanged) {
             log.debug("表头有变动 {}", headers);
         }
         List<Object> rowData = new ArrayList<>(headers.size());
@@ -152,7 +153,7 @@ public class BigDataExcelWriterUtil implements Serializable, Closeable {
      * @return
      */
     public Map<String, Object> convertToMap(TreeMap<String, String> treeMap) {
-        return treeMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue()));
+        return treeMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     /**
@@ -181,7 +182,7 @@ public class BigDataExcelWriterUtil implements Serializable, Closeable {
                     writeRows(dsRows, bigWriter);
                 }
             }
-            if (rows.size() > 0) {//写出剩余数据
+            if (!rows.isEmpty()) {//写出剩余数据
                 writeRows(rows, bigWriter);
             }
             bigWriter.close();
@@ -233,7 +234,7 @@ public class BigDataExcelWriterUtil implements Serializable, Closeable {
      */
     private void serialize(List<List<Object>> rows, File file) {
         //log.debug("序列化 {}", file.getAbsolutePath());
-        try (ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(file)))) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(Files.newOutputStream(file.toPath())))) {
             oos.writeObject(rows);
             rows.clear();
         } catch (Exception e) {
@@ -251,7 +252,7 @@ public class BigDataExcelWriterUtil implements Serializable, Closeable {
     private List<List<Object>> deserializer(File file) {
         //log.debug("反序列化 {}", file.getAbsolutePath());
         List<List<Object>> rows = null;
-        try (ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)))) {
+        try (ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(Files.newInputStream(file.toPath())))) {
             rows = (List<List<Object>>) ois.readObject();
             //log.debug("反序列化完毕 {}", file.getAbsolutePath());
         } catch (Exception e) {
