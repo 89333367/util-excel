@@ -25,7 +25,6 @@
 ## 例子
 
 ```java
-
 @Test
 void t001() {
     BigDataExcelWriterUtil writerUtil = BigDataExcelWriterUtil.builder()
@@ -48,8 +47,8 @@ void t001() {
     });
     //写出文件
     writerUtil.write();
-    //回收资源
     writerUtil.close();
+    log.info("done");
 }
 
 @Test
@@ -58,7 +57,7 @@ void t002() {
             .build(FileUtil.file("d:/tmp/1.xlsx"));
     //模拟多行数据
     for (int i = 0; i < 1000100; i++) {
-        Map<String, Object> row = new LinkedHashMap<>();//使用LinkedHashMap来保持列顺序
+        Map<String, Object> row = new TreeMap<>();
         row.put("列名1", i);
         row.put("列名2", i);
         row.put("列名3", i);
