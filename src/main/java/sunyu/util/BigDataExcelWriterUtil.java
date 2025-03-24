@@ -19,84 +19,128 @@ import java.util.Map;
  *
  * @author 孙宇
  */
-public class BigDataExcelWriterUtil implements Serializable, Closeable {
+public class BigDataExcelWriterUtil implements AutoCloseable {
     private final Log log = LogFactory.get();
+    private final Config config;
 
-    //表头，key是用来找数据对应的值，value用来展示表头信息
-    private final Map<String, String> headers = new LinkedHashMap<>();
-    //每Sheet最大数据行数
-    private int pageSize = 1000000;
-    //数据缓存行数，配置越大越费内存
-    private int cacheSize = 5000;
-    //默认Sheet名称
-    private String sheetName;
-    //写出文件
-    private File destFile;
-    //每一行数据
-    private final List<List<?>> rows = new ArrayList<>();
-    //临时记录序列化文件路径
-    private final List<String> tmpSerializeFilePath = new ArrayList<>();
-    //写出数据行数计数器
-    private int counter = 0;
-
-
-    /**
-     * 表头别名回调，保留key，修改value即可
-     */
-    public interface HeadersAliasCallback {
-        void execute(Map<String, String> headers);
+    public static Builder builder() {
+        return new Builder();
     }
 
-    /**
-     * 设置每Sheet最大数据行数，超过行数会自动新建Sheet，默认1000000
-     *
-     * @param size
-     */
-    public BigDataExcelWriterUtil pageSize(int size) {
-        if (size < this.pageSize) {
-            this.pageSize = size;
+    private BigDataExcelWriterUtil(Config config) {
+        log.info("[构建BigDataExcelWriterUtil] 开始");
+        if (config.destFile == null) {
+            config.destFile = FileUtil.file("temp.xlsx");
         }
-        return this;
+        log.info("目标路径 {}", config.destFile.getAbsolutePath());
+        if (config.sheetName == null) {
+            config.sheetName = "Sheet";
+        }
+        log.info("Sheet名称 {}", config.sheetName);
+        log.info("pageSize {}", config.pageSize);
+        log.info("cacheSize {}", config.cacheSize);
+        log.info("临时文件路径 {}", System.getProperty("java.io.tmpdir"));
+        log.info("[构建BigDataExcelWriterUtil] 结束");
+
+        this.config = config;
+    }
+
+    private static class Config {
+        //表头，key是用来找数据对应的值，value用来展示表头信息
+        private final Map<String, String> headers = new LinkedHashMap<>();
+        //每Sheet最大数据行数
+        private int pageSize = 1000000;
+        //数据缓存行数，配置越大越费内存
+        private int cacheSize = 5000;
+        //默认Sheet名称
+        private String sheetName;
+        //写出文件
+        private File destFile;
+        //每一行数据
+        private final List<List<?>> rows = new ArrayList<>();
+        //临时记录序列化文件路径
+        private final List<String> tmpSerializeFilePath = new ArrayList<>();
+        //写出数据行数计数器
+        private int counter = 0;
+    }
+
+    public static class Builder {
+        private final Config config = new Config();
+
+        public BigDataExcelWriterUtil build() {
+            return new BigDataExcelWriterUtil(config);
+        }
+
+        /**
+         * 设置每Sheet最大数据行数，超过行数会自动新建Sheet，默认1000000
+         *
+         * @param size
+         */
+        public Builder pageSize(int size) {
+            if (size < config.pageSize) {
+                config.pageSize = size;
+            }
+            return this;
+        }
+
+        /**
+         * 设置数据缓存行数，配置越大越费内存，默认5000
+         *
+         * @param size
+         */
+        public Builder cacheSize(int size) {
+            config.cacheSize = size;
+            return this;
+        }
+
+        /**
+         * 设置目标文件
+         *
+         * @param file
+         */
+        public Builder destFile(File file) {
+            config.destFile = file;
+            return this;
+        }
+
+        /**
+         * 设置目标文件
+         *
+         * @param file 全路径+文件名称+后缀名(/tmp/temp.xlsx)
+         */
+        public Builder destFile(String file) {
+            config.destFile = FileUtil.file(file);
+            return this;
+        }
+
+        /**
+         * 设置Sheet名称
+         *
+         * @param name
+         */
+        public Builder sheetName(String name) {
+            config.sheetName = name;
+            return this;
+        }
     }
 
     /**
-     * 设置数据缓存行数，配置越大越费内存，默认5000
-     *
-     * @param size
+     * 回收资源
      */
-    public BigDataExcelWriterUtil cacheSize(int size) {
-        this.cacheSize = size;
-        return this;
-    }
-
-    /**
-     * 设置目标文件
-     *
-     * @param file
-     */
-    public BigDataExcelWriterUtil destFile(File file) {
-        this.destFile = file;
-        return this;
-    }
-
-    /**
-     * 设置目标文件
-     *
-     * @param file 全路径+文件名称+后缀名(/tmp/temp.xlsx)
-     */
-    public BigDataExcelWriterUtil destFile(String file) {
-        this.destFile = FileUtil.file(file);
-        return this;
-    }
-
-    /**
-     * 设置Sheet名称
-     *
-     * @param name
-     */
-    public BigDataExcelWriterUtil sheetName(String name) {
-        this.sheetName = name;
-        return this;
+    @Override
+    public void close() {
+        log.info("[销毁BigDataExcelWriterUtil] 开始");
+        log.info("清理临时序列化文件开始");
+        config.tmpSerializeFilePath.parallelStream().forEach(filePath -> {
+            try {
+                //log.debug("清理 {}", filePath);
+                FileUtil.del(filePath);
+            } catch (Exception e) {
+                log.warn("清理临时序列化文件异常 {}", ExceptionUtil.stacktraceToString(e));
+            }
+        });
+        log.info("清理临时序列化文件完毕");
+        log.info("[销毁BigDataExcelWriterUtil] 结束");
     }
 
     /**
@@ -118,35 +162,35 @@ public class BigDataExcelWriterUtil implements Serializable, Closeable {
     public void append(Map<String, ?> row) {
         boolean headersChanged = false;
         for (String k : row.keySet()) {
-            if (!headers.containsKey(k)) {
-                headers.put(k, k);
+            if (!config.headers.containsKey(k)) {
+                config.headers.put(k, k);
 
                 headersChanged = true;
             }
         }
         if (headersChanged) {
-            log.debug("表头有变动 {}", headers);
+            log.debug("表头有变动 {}", config.headers);
         }
-        List<Object> rowData = new ArrayList<>(headers.size());
-        for (String header : headers.keySet()) {
+        List<Object> rowData = new ArrayList<>(config.headers.size());
+        for (String header : config.headers.keySet()) {
             rowData.add(row.get(header));
         }
-        rows.add(rowData);
-        if (rows.size() == cacheSize) {//到达缓存上限，序列化到磁盘
+        config.rows.add(rowData);
+        if (config.rows.size() == config.cacheSize) {//到达缓存上限，序列化到磁盘
             File tempFile = FileUtil.createTempFile();
-            tmpSerializeFilePath.add(tempFile.getAbsolutePath());
-            serialize(rows, tempFile);
+            config.tmpSerializeFilePath.add(tempFile.getAbsolutePath());
+            serialize(config.rows, tempFile);
         }
     }
 
     /**
      * 更改表头别名，通过回调方法，更改headers里面的value即可
      *
-     * @param callback
+     * @param handler
      */
-    public void setHeadersAlias(HeadersAliasCallback callback) {
-        callback.execute(headers);
-        log.debug("表头更改别名 {}", headers);
+    public void setHeadersAlias(java.util.function.Consumer<Map<String, String>> handler) {
+        handler.accept(config.headers);
+        log.debug("表头更改别名 {}", config.headers);
     }
 
     /**
@@ -156,24 +200,24 @@ public class BigDataExcelWriterUtil implements Serializable, Closeable {
         try {
             BigExcelWriter bigWriter = ExcelUtil.getBigWriter();
             bigWriter.disableDefaultStyle();//禁用样式，导出速度快
-            bigWriter.setDestFile(destFile);
-            bigWriter.renameSheet(sheetName);//重命名Sheet
-            bigWriter.writeRow(headers.values());//写入表头//写入第一个Sheet的表头
-            for (String filePath : tmpSerializeFilePath) {//从磁盘反序列化数据
+            bigWriter.setDestFile(config.destFile);
+            bigWriter.renameSheet(config.sheetName);//重命名Sheet
+            bigWriter.writeRow(config.headers.values());//写入表头//写入第一个Sheet的表头
+            for (String filePath : config.tmpSerializeFilePath) {//从磁盘反序列化数据
                 List<List<?>> dsRows = deserializer(FileUtil.file(filePath));
                 if (dsRows != null) {//写出数据
                     writeRows(dsRows, bigWriter);
                 }
             }
-            if (!rows.isEmpty()) {//写出剩余数据
-                writeRows(rows, bigWriter);
+            if (!config.rows.isEmpty()) {//写出剩余数据
+                writeRows(config.rows, bigWriter);
             }
             bigWriter.close();
         } catch (Exception e) {
             log.error("写出excel异常 {}", ExceptionUtil.stacktraceToString(e));
         } finally {
             log.debug("清理临时序列化文件开始");
-            tmpSerializeFilePath.parallelStream().forEach(filePath -> {
+            config.tmpSerializeFilePath.parallelStream().forEach(filePath -> {
                 try {
                     //log.debug("清理 {}", filePath);
                     FileUtil.del(filePath);
@@ -181,10 +225,10 @@ public class BigDataExcelWriterUtil implements Serializable, Closeable {
                     log.warn("清理临时序列化文件异常 {}", ExceptionUtil.stacktraceToString(e));
                 }
             });
-            tmpSerializeFilePath.clear();
+            config.tmpSerializeFilePath.clear();
             log.debug("清理临时序列化文件结束");
         }
-        log.debug("写出文件完毕 {}", destFile.getAbsolutePath());
+        log.debug("写出文件完毕 {}", config.destFile.getAbsolutePath());
     }
 
     /**
@@ -196,15 +240,15 @@ public class BigDataExcelWriterUtil implements Serializable, Closeable {
      */
     private void writeRows(List<List<?>> rows, BigExcelWriter bigWriter) {
         for (List<?> row : rows) {
-            if (counter == pageSize) {//如果超出限制，新建Sheet
-                bigWriter.setSheet(sheetName + (bigWriter.getSheetCount() + 1));
-                counter = 0;
+            if (config.counter == config.pageSize) {//如果超出限制，新建Sheet
+                bigWriter.setSheet(config.sheetName + (bigWriter.getSheetCount() + 1));
+                config.counter = 0;
 
-                bigWriter.writeRow(headers.values());//新建一个Sheet后，写入表头
+                bigWriter.writeRow(config.headers.values());//新建一个Sheet后，写入表头
             }
 
             bigWriter.writeRow(row);//写出一行数据
-            counter++;
+            config.counter++;
         }
     }
 
@@ -243,77 +287,5 @@ public class BigDataExcelWriterUtil implements Serializable, Closeable {
         }
         return rows;
     }
-
-
-    /**
-     * 私有构造，避免外部初始化
-     */
-    private BigDataExcelWriterUtil() {
-    }
-
-    /**
-     * 获得工具类工厂
-     *
-     * @return
-     */
-    public static BigDataExcelWriterUtil builder() {
-        return new BigDataExcelWriterUtil();
-    }
-
-    /**
-     * 构建工具类
-     *
-     * @param destFile 目标文件
-     * @return
-     */
-    public BigDataExcelWriterUtil build(File destFile) {
-        log.info("构建工具类开始");
-        log.info("配置目标路径开始");
-        if (destFile != null) {
-            this.destFile = destFile;
-        } else if (this.destFile == null) {
-            this.destFile = FileUtil.file("temp.xlsx");
-        }
-        log.info("配置目标路径结束 {}", this.destFile.getAbsolutePath());
-        log.info("配置Sheet名称开始");
-        if (sheetName == null) {
-            sheetName = "Sheet";
-        }
-        log.info("配置Sheet名称结束 {}", sheetName);
-        log.info("pageSize {}", pageSize);
-        log.info("cacheSize {}", cacheSize);
-        log.info("临时文件路径 {}", System.getProperty("java.io.tmpdir"));
-        log.info("构建工具类结束");
-        return this;
-    }
-
-    /**
-     * 构建工具类
-     *
-     * @return
-     */
-    public BigDataExcelWriterUtil build() {
-        return build(null);
-    }
-
-    /**
-     * 回收资源，等待sql缓存和所有线程队列执行完毕
-     */
-    @Override
-    public void close() {
-        log.info("销毁工具类开始");
-        log.info("清理临时序列化文件开始");
-        tmpSerializeFilePath.parallelStream().forEach(filePath -> {
-            try {
-                //log.debug("清理 {}", filePath);
-                FileUtil.del(filePath);
-            } catch (Exception e) {
-                log.warn("清理临时序列化文件异常 {}", ExceptionUtil.stacktraceToString(e));
-            }
-        });
-        log.info("清理临时序列化文件完毕");
-        log.info("销毁工具类完毕");
-    }
-
 
 }
