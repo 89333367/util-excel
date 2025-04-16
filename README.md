@@ -4,7 +4,7 @@
 
 * 为了解决动态列大数据导出，不固定列的问题，扩展BigExcelWriter类
 * 因为Hbase是列式存储，有可能每一行的列都不同，那么导出excel的时候，表头就是动态的
-* 注意，这个类非线程安全，一定不要在多线程中使用
+* 可以按行读取超大excel文件，避免内存溢出
 * 目前只适用于一行表头
 
 ## 环境
@@ -68,5 +68,27 @@ public class TestBigDataExcelWriterUtil {
 
 }
 
+
+@Test
+void t002() {
+    String filePath = "d:/tmp/从23年11月开始截止到现在已激活无流量卡(只有武汉和天盛对接的数据)2.xlsx";
+    BigDataExcelReaderUtil bigDataExcelReaderUtil = BigDataExcelReaderUtil.builder()
+            .setFilePath(filePath)//读取文件路径
+            //.setFile(file)//读取文件
+            //.setFileInputStream(in)//读取文件流
+            .setRid(-1)//读取所有sheet；-1表示读取全部Sheet, 0表示只读取第一个Sheet
+            .build();
+    bigDataExcelReaderUtil.read(excelRow -> {
+        // 处理ExcelRow对象
+        log.info("{} {} {} {} {}",
+                excelRow.getSheetIndex(),
+                excelRow.getSheetName(),
+                excelRow.getRowIndex(),
+                excelRow.getRowMap(),
+                excelRow.getRowCells()
+        );
+    });
+    bigDataExcelReaderUtil.close();
+}
 ```
 
