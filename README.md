@@ -76,7 +76,6 @@ void t002() {
     BigDataExcelReaderUtil bigDataExcelReaderUtil = BigDataExcelReaderUtil.builder()
             .setFilePath(filePath)//读取文件路径
             //.setFile(file)//读取文件
-            //.setFileInputStream(in)//读取文件流
             .setRid(-1)//读取所有sheet；-1表示读取全部Sheet, 0表示只读取第一个Sheet
             .build();
     bigDataExcelReaderUtil.read(excelRow -> {
