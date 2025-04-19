@@ -78,6 +78,8 @@ void t002() {
             //.setFile(file)//读取文件
             .setRid(-1)//读取所有sheet；-1表示读取全部Sheet, 0表示只读取第一个Sheet
             .build();
+    log.info("{}", bigDataExcelReaderUtil.getSheetNames());
+    log.info("{}", bigDataExcelReaderUtil.getSheetHeaders());
     bigDataExcelReaderUtil.read(excelRow -> {
         // 处理ExcelRow对象
         log.info("{} {} {} {} {}",
