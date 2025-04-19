@@ -40,9 +40,9 @@ public class BigDataExcelReaderUtil implements AutoCloseable {
 
     private BigDataExcelReaderUtil(Config config) {
         log.info("[构建BigDataExcelReaderUtil] 开始");
-        this.config = config;
-        initSheetNamesAndHeaders();
+        initSheetNamesAndHeaders(config);
         log.info("[构建BigDataExcelReaderUtil] 结束");
+        this.config = config;
     }
 
     private static class Config {
@@ -82,8 +82,8 @@ public class BigDataExcelReaderUtil implements AutoCloseable {
         log.info("[销毁BigDataExcelReaderUtil] 结束");
     }
 
-    private void initSheetNamesAndHeaders() {
-        try (InputStream inputStream = getSourceStream(); OPCPackage pkg = OPCPackage.open(inputStream)) {
+    private void initSheetNamesAndHeaders(Config config) {
+        try (InputStream inputStream = getSourceStream(config); OPCPackage pkg = OPCPackage.open(inputStream)) {
             XSSFReader reader = new XSSFReader(pkg);
             XSSFReader.SheetIterator sheetIterator = (XSSFReader.SheetIterator) reader.getSheetsData();
             SharedStrings sst = reader.getSharedStringsTable();
@@ -91,7 +91,7 @@ public class BigDataExcelReaderUtil implements AutoCloseable {
             while (sheetIterator.hasNext()) {
                 InputStream sheetStream = sheetIterator.next();
                 config.sheetNames.add(sheetIterator.getSheetName());
-                parseSheetHeader(sheetStream, sst, currentSheetIndex);
+                parseSheetHeader(sheetStream, sst, currentSheetIndex, config);
                 currentSheetIndex++;
             }
         } catch (Exception e) {
@@ -99,7 +99,7 @@ public class BigDataExcelReaderUtil implements AutoCloseable {
         }
     }
 
-    private InputStream getSourceStream() throws IOException {
+    private InputStream getSourceStream(Config config) throws IOException {
         if (config.filePath != null) {
             return Files.newInputStream(Paths.get(config.filePath));
         } else if (config.file != null) {
@@ -117,7 +117,7 @@ public class BigDataExcelReaderUtil implements AutoCloseable {
         return config.sheetNames;
     }
 
-    private void parseSheetHeader(InputStream sheetStream, SharedStrings sst, int sheetIndex) throws SAXException, IOException {
+    private void parseSheetHeader(InputStream sheetStream, SharedStrings sst, int sheetIndex, Config config) throws SAXException, IOException {
         XMLReader xmlReader = XMLReaderFactory.createXMLReader();
         HeaderSAXHandler handler = new HeaderSAXHandler(sst);
         handler.setSheetIndex(sheetIndex);
