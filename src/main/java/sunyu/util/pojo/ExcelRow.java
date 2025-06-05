@@ -9,10 +9,6 @@ public class ExcelRow {
      */
     private int sheetIndex;
     /**
-     * sheet名称
-     */
-    private String sheetName;
-    /**
      * 行索引
      */
     private long rowIndex;
@@ -25,9 +21,8 @@ public class ExcelRow {
      */
     private List<Object> rowCells;
 
-    public ExcelRow(int sheetIndex, String sheetName, long rowIndex, Map<String, Object> rowMap, List<Object> rowCells) {
+    public ExcelRow(int sheetIndex, long rowIndex, Map<String, Object> rowMap, List<Object> rowCells) {
         this.sheetIndex = sheetIndex;
-        this.sheetName = sheetName;
         this.rowIndex = rowIndex;
         this.rowMap = rowMap;
         this.rowCells = rowCells;
@@ -39,14 +34,6 @@ public class ExcelRow {
 
     public void setSheetIndex(int sheetIndex) {
         this.sheetIndex = sheetIndex;
-    }
-
-    public String getSheetName() {
-        return sheetName;
-    }
-
-    public void setSheetName(String sheetName) {
-        this.sheetName = sheetName;
     }
 
     public long getRowIndex() {

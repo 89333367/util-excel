@@ -3,8 +3,6 @@ package sunyu.util;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
 import cn.hutool.poi.excel.ExcelUtil;
-import org.apache.poi.openxml4j.opc.OPCPackage;
-import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.model.SharedStrings;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -40,13 +38,11 @@ public class BigDataExcelReaderUtil implements AutoCloseable {
 
     private BigDataExcelReaderUtil(Config config) {
         log.info("[构建BigDataExcelReaderUtil] 开始");
-        initSheetNamesAndHeaders(config);
         log.info("[构建BigDataExcelReaderUtil] 结束");
         this.config = config;
     }
 
     private static class Config {
-        private final List<String> sheetNames = new ArrayList<>();
         private final Map<Integer, List<String>> sheetHeaders = new HashMap<>();
         private int rid = 0;
         private String filePath;
@@ -82,23 +78,6 @@ public class BigDataExcelReaderUtil implements AutoCloseable {
         log.info("[销毁BigDataExcelReaderUtil] 结束");
     }
 
-    private void initSheetNamesAndHeaders(Config config) {
-        try (InputStream inputStream = getSourceStream(config); OPCPackage pkg = OPCPackage.open(inputStream)) {
-            XSSFReader reader = new XSSFReader(pkg);
-            XSSFReader.SheetIterator sheetIterator = (XSSFReader.SheetIterator) reader.getSheetsData();
-            SharedStrings sst = reader.getSharedStringsTable();
-            int currentSheetIndex = 0;
-            while (sheetIterator.hasNext()) {
-                InputStream sheetStream = sheetIterator.next();
-                config.sheetNames.add(sheetIterator.getSheetName());
-                parseSheetHeader(sheetStream, sst, currentSheetIndex, config);
-                currentSheetIndex++;
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("初始化Sheet名称和表头信息失败", e);
-        }
-    }
-
     private InputStream getSourceStream(Config config) throws IOException {
         if (config.filePath != null) {
             return Files.newInputStream(Paths.get(config.filePath));
@@ -111,10 +90,6 @@ public class BigDataExcelReaderUtil implements AutoCloseable {
 
     public Map<Integer, List<String>> getSheetHeaders() {
         return config.sheetHeaders;
-    }
-
-    public List<String> getSheetNames() {
-        return config.sheetNames;
     }
 
     private void parseSheetHeader(InputStream sheetStream, SharedStrings sst, int sheetIndex, Config config) throws SAXException, IOException {
@@ -223,7 +198,7 @@ public class BigDataExcelReaderUtil implements AutoCloseable {
                         rowMap.put(headers.get(i), value);
                     }
                 }
-                consumer.accept(new ExcelRow(sheetIndex, config.sheetNames.get(sheetIndex), rowIndex, rowMap, rowCells));
+                consumer.accept(new ExcelRow(sheetIndex, rowIndex, rowMap, rowCells));
             }
         }
     }
