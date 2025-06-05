@@ -3,12 +3,9 @@ package sunyu.util;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
 import cn.hutool.poi.excel.ExcelUtil;
-import cn.hutool.poi.excel.WorkbookUtil;
-import org.apache.poi.ss.usermodel.Workbook;
 import sunyu.util.pojo.ExcelRow;
 
 import java.io.File;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,23 +27,6 @@ public class BigDataExcelReaderUtil implements AutoCloseable {
 
     private BigDataExcelReaderUtil(Config config) {
         log.info("[构建BigDataExcelReaderUtil] 开始");
-
-        if (config.filePath != null) {
-            config.workbook = WorkbookUtil.createBook(config.filePath);
-        } else if (config.file != null) {
-            config.workbook = WorkbookUtil.createBook(config.file);
-        } else {
-            throw new RuntimeException("请设置读取文件路径，或文件对象");
-        }
-        /*try {
-            for (int i = 0; i < config.workbook.getNumberOfSheets(); i++) {
-                config.sheetNames.add(config.workbook.getSheetName(i));
-            }
-            config.workbook.close(); // 关闭Workbook避免文件占用
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }*/
-
         log.info("[构建BigDataExcelReaderUtil] 结束");
         this.config = config;
     }
@@ -57,8 +37,6 @@ public class BigDataExcelReaderUtil implements AutoCloseable {
         private int rid = 0;//设置读取sheet rid，-1表示读取全部Sheet, 0表示只读取第一个Sheet
         private String filePath;//读取文件路径
         private File file;//读取文件
-        private InputStream fileInputStream;//读取文件流
-        private Workbook workbook;
     }
 
     public static class Builder {
@@ -98,17 +76,6 @@ public class BigDataExcelReaderUtil implements AutoCloseable {
          */
         public Builder setFile(File file) {
             config.file = file;
-            return this;
-        }
-
-        /**
-         * 设置读取文件流
-         *
-         * @param fileInputStream
-         * @return
-         */
-        public Builder setFileInputStream(InputStream fileInputStream) {
-            config.fileInputStream = fileInputStream;
             return this;
         }
 
