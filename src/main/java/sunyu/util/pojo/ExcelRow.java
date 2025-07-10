@@ -15,13 +15,13 @@ public class ExcelRow {
     /**
      * 行数据map格式，key是表头，value是单元格数据
      */
-    private Map<String, Object> rowMap;
+    private Map<String, ?> rowMap;
     /**
      * 行数据list格式，list的索引对应表头索引
      */
-    private List<Object> rowCells;
+    private List<?> rowCells;
 
-    public ExcelRow(int sheetIndex, long rowIndex, Map<String, Object> rowMap, List<Object> rowCells) {
+    public ExcelRow(int sheetIndex, long rowIndex, Map<String, ?> rowMap, List<?> rowCells) {
         this.sheetIndex = sheetIndex;
         this.rowIndex = rowIndex;
         this.rowMap = rowMap;
@@ -44,19 +44,19 @@ public class ExcelRow {
         this.rowIndex = rowIndex;
     }
 
-    public Map<String, Object> getRowMap() {
+    public Map<String, ?> getRowMap() {
         return rowMap;
     }
 
-    public void setRowMap(Map<String, Object> rowMap) {
+    public void setRowMap(Map<String, ?> rowMap) {
         this.rowMap = rowMap;
     }
 
-    public List<Object> getRowCells() {
+    public List<?> getRowCells() {
         return rowCells;
     }
 
-    public void setRowCells(List<Object> rowCells) {
+    public void setRowCells(List<?> rowCells) {
         this.rowCells = rowCells;
     }
 }

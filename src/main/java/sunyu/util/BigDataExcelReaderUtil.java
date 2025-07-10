@@ -32,7 +32,6 @@ public class BigDataExcelReaderUtil implements AutoCloseable {
     }
 
     private static class Config {
-        private final List<String> sheetNames = new ArrayList<>();//存储每个sheet的名称
         private final Map<Integer, List<String>> sheetHeaders = new HashMap<>();//存储每个sheet的里的标题列表
         private int rid = 0;//设置读取sheet rid，-1表示读取全部Sheet, 0表示只读取第一个Sheet
         private String filePath;//读取文件路径
