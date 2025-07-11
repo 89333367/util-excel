@@ -148,7 +148,7 @@ public class BigDataExcelWriterUtil implements AutoCloseable {
      *
      * @param rows
      */
-    public void append(List<Map<String, ?>> rows) {
+    synchronized public void append(List<Map<String, ?>> rows) {
         for (Map<String, ?> row : rows) {
             append(row);
         }
@@ -159,7 +159,7 @@ public class BigDataExcelWriterUtil implements AutoCloseable {
      *
      * @param row
      */
-    public void append(Map<String, ?> row) {
+    synchronized public void append(Map<String, ?> row) {
         boolean headersChanged = false;
         for (String k : row.keySet()) {
             if (!config.headers.containsKey(k)) {
