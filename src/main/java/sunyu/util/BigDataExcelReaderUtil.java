@@ -49,6 +49,7 @@ public class BigDataExcelReaderUtil implements AutoCloseable {
          * 设置读取sheet rid，-1表示读取全部Sheet, 0表示只读取第一个Sheet
          *
          * @param rid
+         *
          * @return
          */
         public Builder setRid(int rid) {
@@ -60,6 +61,7 @@ public class BigDataExcelReaderUtil implements AutoCloseable {
          * 设置读取文件路径
          *
          * @param filePath d:/tmp/xxx.xlsx
+         *
          * @return
          */
         public Builder setFilePath(String filePath) {
@@ -71,6 +73,7 @@ public class BigDataExcelReaderUtil implements AutoCloseable {
          * 设置读取文件
          *
          * @param file
+         *
          * @return
          */
         public Builder setFile(File file) {
@@ -111,7 +114,9 @@ public class BigDataExcelReaderUtil implements AutoCloseable {
             // 将标题行转换为String类型并去除空格
             List<String> headers = new ArrayList<>();
             for (Object cell : rowCells) {
-                headers.add(cell.toString().trim());  // 标题去除左右空格
+                if (cell != null) {
+                    headers.add(cell.toString().trim());  // 标题去除左右空格
+                }
             }
             config.sheetHeaders.put(sheetIndex, headers);
         } else {
