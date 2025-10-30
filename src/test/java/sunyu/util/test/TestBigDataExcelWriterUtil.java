@@ -1,12 +1,13 @@
 package sunyu.util.test;
 
-import cn.hutool.log.Log;
-import cn.hutool.log.LogFactory;
-import org.junit.jupiter.api.Test;
-import sunyu.util.BigDataExcelWriterUtil;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import org.junit.jupiter.api.Test;
+
+import cn.hutool.log.Log;
+import cn.hutool.log.LogFactory;
+import sunyu.util.BigDataExcelWriterUtil;
 
 public class TestBigDataExcelWriterUtil {
     Log log = LogFactory.get();
@@ -26,9 +27,11 @@ public class TestBigDataExcelWriterUtil {
             writerUtil.append(row);//追加行
         }
         //单独追加一行，只有一列的
-        writerUtil.append(new LinkedHashMap<String, Object>() {{
-            put("列名2", "单独追加的列值");
-        }});
+        writerUtil.append(new LinkedHashMap<String, Object>() {
+            {
+                put("列名2", "单独追加的列值");
+            }
+        });
         //更改表头别名
         writerUtil.setHeadersAlias(headers -> {
             //将 列名1 改成 列名one

@@ -1,18 +1,19 @@
 package sunyu.util.test;
 
-import cn.hutool.log.Log;
-import cn.hutool.log.LogFactory;
-import cn.hutool.poi.excel.ExcelUtil;
-import cn.hutool.poi.excel.WorkbookUtil;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.junit.jupiter.api.Test;
-import sunyu.util.BigDataExcelReaderUtil;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.poi.ss.usermodel.Workbook;
+import org.junit.jupiter.api.Test;
+
+import cn.hutool.log.Log;
+import cn.hutool.log.LogFactory;
+import cn.hutool.poi.excel.ExcelUtil;
+import cn.hutool.poi.excel.WorkbookUtil;
+import sunyu.util.BigDataExcelReaderUtil;
 
 public class TestBigDataExcelReaderUtil {
     private static final Log log = LogFactory.get();
@@ -38,7 +39,7 @@ public class TestBigDataExcelReaderUtil {
                 // 将标题行转换为String类型并去除空格
                 List<String> headers = new ArrayList<>();
                 for (Object cell : rowCells) {
-                    headers.add(cell.toString().trim());  // 标题去除左右空格
+                    headers.add(cell.toString().trim()); // 标题去除左右空格
                 }
                 sheetHeaders.put(sheetIndex, headers);
             } else {
@@ -77,8 +78,7 @@ public class TestBigDataExcelReaderUtil {
                     excelRow.getSheetIndex(),
                     excelRow.getRowIndex(),
                     excelRow.getRowMap(),
-                    excelRow.getRowCells()
-            );
+                    excelRow.getRowCells());
         });
         bigDataExcelReaderUtil.close();
     }
@@ -97,8 +97,7 @@ public class TestBigDataExcelReaderUtil {
                     excelRow.getSheetIndex(),
                     excelRow.getRowIndex(),
                     excelRow.getRowMap(),
-                    excelRow.getRowCells()
-            );
+                    excelRow.getRowCells());
         });
         bigDataExcelReaderUtil.close();
     }

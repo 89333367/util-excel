@@ -1,16 +1,16 @@
 package sunyu.util;
 
-import cn.hutool.log.Log;
-import cn.hutool.log.LogFactory;
-import cn.hutool.poi.excel.ExcelUtil;
-import sunyu.util.pojo.ExcelRow;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+
+import cn.hutool.log.Log;
+import cn.hutool.log.LogFactory;
+import cn.hutool.poi.excel.ExcelUtil;
+import sunyu.util.pojo.ExcelRow;
 
 /**
  * 大数据Excel读取工具类
@@ -26,8 +26,8 @@ public class BigDataExcelReaderUtil implements AutoCloseable {
     }
 
     private BigDataExcelReaderUtil(Config config) {
-        log.info("[构建BigDataExcelReaderUtil] 开始");
-        log.info("[构建BigDataExcelReaderUtil] 结束");
+        log.info("[构建{}] 开始", this.getClass().getSimpleName());
+        log.info("[构建{}] 结束", this.getClass().getSimpleName());
         this.config = config;
     }
 
@@ -88,8 +88,8 @@ public class BigDataExcelReaderUtil implements AutoCloseable {
      */
     @Override
     public void close() {
-        log.info("[销毁BigDataExcelReaderUtil] 开始");
-        log.info("[销毁BigDataExcelReaderUtil] 结束");
+        log.info("[销毁{}] 开始", this.getClass().getSimpleName());
+        log.info("[销毁{}] 结束", this.getClass().getSimpleName());
     }
 
     /**
@@ -115,7 +115,7 @@ public class BigDataExcelReaderUtil implements AutoCloseable {
             List<String> headers = new ArrayList<>();
             for (Object cell : rowCells) {
                 if (cell != null) {
-                    headers.add(cell.toString().trim());  // 标题去除左右空格
+                    headers.add(cell.toString().trim()); // 标题去除左右空格
                 }
             }
             config.sheetHeaders.put(sheetIndex, headers);
@@ -139,6 +139,5 @@ public class BigDataExcelReaderUtil implements AutoCloseable {
             }
         }
     }
-
 
 }

@@ -1,18 +1,22 @@
 package sunyu.util;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
 import cn.hutool.poi.excel.BigExcelWriter;
 import cn.hutool.poi.excel.ExcelUtil;
-
-import java.io.*;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 大数据Excel写出工具类
@@ -28,7 +32,7 @@ public class BigDataExcelWriterUtil implements AutoCloseable {
     }
 
     private BigDataExcelWriterUtil(Config config) {
-        log.info("[构建BigDataExcelWriterUtil] 开始");
+        log.info("[构建{}] 开始", this.getClass().getSimpleName());
         if (config.destFile == null) {
             config.destFile = FileUtil.file("temp.xlsx");
         }
@@ -40,7 +44,7 @@ public class BigDataExcelWriterUtil implements AutoCloseable {
         log.info("pageSize {}", config.pageSize);
         log.info("cacheSize {}", config.cacheSize);
         log.info("临时文件路径 {}", System.getProperty("java.io.tmpdir"));
-        log.info("[构建BigDataExcelWriterUtil] 结束");
+        log.info("[构建{}] 结束", this.getClass().getSimpleName());
 
         this.config = config;
     }
@@ -129,7 +133,7 @@ public class BigDataExcelWriterUtil implements AutoCloseable {
      */
     @Override
     public void close() {
-        log.info("[销毁BigDataExcelWriterUtil] 开始");
+        log.info("[销毁{}] 开始", this.getClass().getSimpleName());
         log.info("清理临时序列化文件开始");
         config.tmpSerializeFilePath.parallelStream().forEach(filePath -> {
             try {
@@ -140,7 +144,7 @@ public class BigDataExcelWriterUtil implements AutoCloseable {
             }
         });
         log.info("清理临时序列化文件完毕");
-        log.info("[销毁BigDataExcelWriterUtil] 结束");
+        log.info("[销毁{}] 结束", this.getClass().getSimpleName());
     }
 
     /**
@@ -252,7 +256,6 @@ public class BigDataExcelWriterUtil implements AutoCloseable {
         }
     }
 
-
     /**
      * 将数据序列化到磁盘
      *
@@ -261,7 +264,8 @@ public class BigDataExcelWriterUtil implements AutoCloseable {
      */
     private void serialize(List<List<?>> rows, File file) {
         //log.debug("序列化 {}", file.getAbsolutePath());
-        try (ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(Files.newOutputStream(file.toPath())))) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(
+                new BufferedOutputStream(Files.newOutputStream(file.toPath())))) {
             oos.writeObject(rows);
             rows.clear();
         } catch (Exception e) {
@@ -279,8 +283,20 @@ public class BigDataExcelWriterUtil implements AutoCloseable {
     private List<List<?>> deserializer(File file) {
         //log.debug("反序列化 {}", file.getAbsolutePath());
         List<List<?>> rows = null;
-        try (ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(Files.newInputStream(file.toPath())))) {
-            rows = (List<List<?>>) ois.readObject();
+        try (ObjectInputStream ois = new ObjectInputStream(
+                new BufferedInputStream(Files.newInputStream(file.toPath())))) {
+            Object obj = ois.readObject();
+            if (!(obj instanceof java.util.List<?>)) {
+                throw new ClassCastException("Deserialized object is not a List");
+            }
+            java.util.List<?> outer = (java.util.List<?>) obj;
+            rows = new java.util.ArrayList<>(outer.size());
+            for (Object item : outer) {
+                if (!(item instanceof java.util.List<?>)) {
+                    throw new ClassCastException("Row is not a List");
+                }
+                rows.add((java.util.List<?>) item);
+            }
             //log.debug("反序列化完毕 {}", file.getAbsolutePath());
         } catch (Exception e) {
             log.error("反序列化文件异常 {}", ExceptionUtil.stacktraceToString(e));
