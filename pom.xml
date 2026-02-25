@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>sunyu.util</groupId>
@@ -51,6 +51,12 @@
             <artifactId>xercesImpl</artifactId>
             <version>2.12.2</version>
             <optional>true</optional>
+        </dependency>
+        <!-- https://central.sonatype.com/artifact/org.ttzero/eec/versions -->
+        <dependency>
+            <groupId>org.ttzero</groupId>
+            <artifactId>eec</artifactId>
+            <version>0.5.27</version>
         </dependency>
 
 
@@ -102,7 +108,8 @@
                                 <!-- Spring 相关包 -->
                                 <relocation>
                                     <pattern>org.springframework</pattern>
-                                    <shadedPattern>relocations.${project.groupId}.org.springframework</shadedPattern>
+                                    <shadedPattern>
+                                        relocations.${project.groupId}.org.springframework</shadedPattern>
                                 </relocation>
                                 <!-- JUnit 相关包 -->
                                 <relocation>
@@ -173,15 +180,15 @@
                             <transformers>
                                 <!-- 合并META-INF/services文件（插件会自动根据relocation重写类名） -->
                                 <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                    implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
                                 <!-- 处理Apache的META-INF/DISCLAIMER文件 -->
                                 <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                                     <resource>META-INF/DISCLAIMER</resource>
                                 </transformer>
                                 <!-- 处理MANIFEST.MF文件 -->
                                 <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <manifestEntries>
                                         <Multi-Release>true</Multi-Release>
                                     </manifestEntries>
