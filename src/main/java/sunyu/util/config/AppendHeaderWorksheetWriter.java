@@ -1,4 +1,4 @@
-package sunyu.util;
+package sunyu.util.config;
 
 import org.ttzero.excel.entity.e7.XMLWorksheetWriter;
 import org.ttzero.excel.util.ExtBufferedWriter;

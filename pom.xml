@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>sunyu.util</groupId>
     <artifactId>util-excel</artifactId>
-    <!-- {util.version}_{jdk.version} -->
-    <version>2.0_jdk8</version>
+    <!-- {eec.version}_{util.version}_{jdk.version} -->
+    <version>0.5.27_1.0_jdk8</version>
 
     <properties>
         <java.version>1.8</java.version>
@@ -38,25 +38,12 @@
             <version>5.8.43</version>
             <optional>true</optional>
         </dependency>
-        <!-- https://central.sonatype.com/artifact/org.apache.poi/poi-ooxml/versions -->
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi-ooxml</artifactId>
-            <version>5.5.1</version>
-            <optional>true</optional>
-        </dependency>
-        <!-- https://central.sonatype.com/artifact/xerces/xercesImpl/versions -->
-        <dependency>
-            <groupId>xerces</groupId>
-            <artifactId>xercesImpl</artifactId>
-            <version>2.12.2</version>
-            <optional>true</optional>
-        </dependency>
         <!-- https://central.sonatype.com/artifact/org.ttzero/eec/versions -->
         <dependency>
             <groupId>org.ttzero</groupId>
             <artifactId>eec</artifactId>
             <version>0.5.27</version>
+            <optional>true</optional>
         </dependency>
 
 
@@ -64,14 +51,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.14.2</version>
-            <scope>test</scope>
-        </dependency>
-        <!-- https://central.sonatype.com/artifact/org.apache.logging.log4j/log4j-core/versions -->
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>2.25.3</version>
+            <version>5.14.3</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -100,6 +80,11 @@
                                     <pattern>org.apache</pattern>
                                     <shadedPattern>relocations.${project.groupId}.org.apache</shadedPattern>
                                 </relocation>
+                                <!-- DOM4J 相关包 -->
+                                <relocation>
+                                    <pattern>org.dom4j</pattern>
+                                    <shadedPattern>relocations.${project.groupId}.org.dom4j</shadedPattern>
+                                </relocation>
                                 <!-- SLF4J 相关包 -->
                                 <relocation>
                                     <pattern>org.slf4j</pattern>
@@ -108,8 +93,7 @@
                                 <!-- Spring 相关包 -->
                                 <relocation>
                                     <pattern>org.springframework</pattern>
-                                    <shadedPattern>
-                                        relocations.${project.groupId}.org.springframework</shadedPattern>
+                                    <shadedPattern>relocations.${project.groupId}.org.springframework</shadedPattern>
                                 </relocation>
                                 <!-- JUnit 相关包 -->
                                 <relocation>
@@ -176,19 +160,24 @@
                                     <pattern>cn.hutool</pattern>
                                     <shadedPattern>relocations.${project.groupId}.cn.hutool</shadedPattern>
                                 </relocation>
+                                <!-- eec 相关包 -->
+                                <relocation>
+                                    <pattern>org.ttzero</pattern>
+                                    <shadedPattern>relocations.${project.groupId}.org.ttzero</shadedPattern>
+                                </relocation>
                             </relocations>
                             <transformers>
                                 <!-- 合并META-INF/services文件（插件会自动根据relocation重写类名） -->
                                 <transformer
-                                    implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 <!-- 处理Apache的META-INF/DISCLAIMER文件 -->
                                 <transformer
-                                    implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                                     <resource>META-INF/DISCLAIMER</resource>
                                 </transformer>
                                 <!-- 处理MANIFEST.MF文件 -->
                                 <transformer
-                                    implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <manifestEntries>
                                         <Multi-Release>true</Multi-Release>
                                     </manifestEntries>
@@ -235,7 +224,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.4</version>
+                <version>3.5.5</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>
