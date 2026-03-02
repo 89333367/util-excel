@@ -1,9 +1,11 @@
 package sunyu.util.config;
 
-import org.ttzero.excel.entity.e7.XMLWorksheetWriter;
-import org.ttzero.excel.util.ExtBufferedWriter;
-
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -15,7 +17,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
-public class AppendHeaderWorksheetWriter extends XMLWorksheetWriter {
+import org.ttzero.excel.entity.e7.XMLWorksheetWriter;
+import org.ttzero.excel.util.ExtBufferedWriter;
+
+/**
+ * 动态列的WorksheetWriter
+ * 
+ * 一般用于列头数据不是固定的
+ *
+ * @author SunYu
+ */
+public class DynamicColumnWorksheetWriter extends XMLWorksheetWriter {
     // 记录body的位置
     long position = 0L;
 
@@ -32,11 +44,7 @@ public class AppendHeaderWorksheetWriter extends XMLWorksheetWriter {
     public void close() throws IOException {
         super.close();
 
-        XMLWorksheetWriter _writer = new XMLWorksheetWriter(sheet) {
-            private boolean hasMedia() {
-                return false;
-            }
-        };
+        XMLWorksheetWriter _writer = new XMLWorksheetWriter(sheet);
         Class<XMLWorksheetWriter> clazz = XMLWorksheetWriter.class;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
@@ -70,8 +78,8 @@ public class AppendHeaderWorksheetWriter extends XMLWorksheetWriter {
             beforeSheetDataMethod.invoke(_writer, sheet.getNonHeader() == 1);
 
             bw.close();
-        } catch (NoSuchFieldException | IllegalAccessException | InvocationTargetException | NoSuchMethodException |
-                 IOException e) {
+        } catch (NoSuchFieldException | IllegalAccessException | InvocationTargetException | NoSuchMethodException
+                | IOException e) {
             e.printStackTrace();
         }
 
@@ -81,7 +89,8 @@ public class AppendHeaderWorksheetWriter extends XMLWorksheetWriter {
             // 创建临时文件
             Path tmpPath = Files.createFile(workSheetPath.resolve(fileName + "_cp"));
             // 将新表头复制到临时文件中
-            try (SeekableByteChannel channel = Files.newByteChannel(tmpPath, StandardOpenOption.WRITE, StandardOpenOption.READ)) {
+            try (SeekableByteChannel channel = Files.newByteChannel(tmpPath, StandardOpenOption.WRITE,
+                    StandardOpenOption.READ)) {
                 ByteBuffer buffer = ByteBuffer.wrap(baos.toByteArray());
                 buffer.order(ByteOrder.LITTLE_ENDIAN);
                 channel.write(buffer);
@@ -89,7 +98,7 @@ public class AppendHeaderWorksheetWriter extends XMLWorksheetWriter {
 
             // 将Body复制到临时文件中
             try (InputStream is = Files.newInputStream(currentPath);
-                 OutputStream os = Files.newOutputStream(tmpPath, StandardOpenOption.APPEND)) {
+                    OutputStream os = Files.newOutputStream(tmpPath, StandardOpenOption.APPEND)) {
                 is.skip(position); // <- 跳到body处
 
                 byte[] bytes = new byte[4096];

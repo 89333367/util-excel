@@ -1,28 +1,38 @@
 package sunyu.util.config;
 
-import org.ttzero.excel.entity.Column;
-import org.ttzero.excel.entity.ListMapSheet;
-import org.ttzero.excel.reader.Cell;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class AppendKeyMapSheet<T> extends ListMapSheet<T> {
+import org.ttzero.excel.entity.Column;
+import org.ttzero.excel.entity.ListMapSheet;
+import org.ttzero.excel.reader.Cell;
+
+/**
+ * 动态列的ListMapSheet
+ * 
+ * 一般用于列头数据不是固定的
+ *
+ * @author SunYu
+ */
+public class DynamicColumnListMapSheet<T> extends ListMapSheet<T> {
     // 保存已存在中列
     Set<String> existsKeys = new HashSet<>();
 
     @Override
     public Column[] getHeaderColumns() {
         Column[] columns = super.getHeaderColumns();
-        for (Column col : columns) existsKeys.add(col.name); // <- 初始化表头装载到existsKeys
+        for (Column col : columns) {
+            existsKeys.add(col.name); // <- 初始化表头装载到existsKeys
+        }
         return columns;
     }
 
     @Override
     protected void resetBlockData() {
-        if (!eof && left() < rowBlock.capacity()) append();
+        if (!eof && left() < rowBlock.capacity())
+            append();
         int end = getEndIndex(), len;
         for (; start < end; rows++, start++) {
             org.ttzero.excel.entity.Row row = rowBlock.next();
@@ -35,7 +45,7 @@ public class AppendKeyMapSheet<T> extends ListMapSheet<T> {
                 // 检查是否有不存在的key
                 for (String k : rowDate.keySet()) {
                     if (!existsKeys.contains(k)) {
-                        existsKeys.add(k);  // <- 将Key添加到existsKeys
+                        existsKeys.add(k); // <- 将Key添加到existsKeys
                         Column col = new Column(k, k), pre = columns[columns.length - 1].getTail(); // <- 需要判断NPE
                         col.colIndex = pre.colIndex + 1;
                         col.colNum = pre.getColNum() + 1;

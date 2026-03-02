@@ -19,8 +19,8 @@ import org.ttzero.excel.reader.Sheet;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
 import sunyu.util.ExcelUtil;
-import sunyu.util.config.AppendHeaderWorksheetWriter;
-import sunyu.util.config.AppendKeyMapSheet;
+import sunyu.util.config.DynamicColumnListMapSheet;
+import sunyu.util.config.DynamicColumnWorksheetWriter;
 import sunyu.util.test.pojo.FaHuo;
 
 public class TestEec {
@@ -28,7 +28,7 @@ public class TestEec {
     ExcelUtil excelUtil = ExcelUtil.builder().build();
 
     @Test
-    void test_read() {
+    void 读取一个exxcel返回ListMap() {
         List<Map<String, Object>> list = excelUtil.read(Paths.get("d:/tmp/发货明细/20260227/20260226发货明细.xlsx"), 0, 1, 1);
         for (Map<String, Object> m : list) {
             log.info("{}", m);
@@ -37,7 +37,7 @@ public class TestEec {
     }
 
     @Test
-    void test_read2() {
+    void 读取一个excel自己处理细节() {
         excelUtil.read(Paths.get("d:/tmp/excel/2026016发货明细.xlsx"), excelReader -> excelReader
                 .sheet(0)
                 .asFullSheet()
@@ -54,13 +54,25 @@ public class TestEec {
     }
 
     @Test
-    void 写出一个Sheet() {
+    void 写出一个Sheet使用对象数组() {
         // 准备导出数据
         List<Object> rows = new ArrayList<>();
         rows.add(new String[] { "列1", "列2", "列3" });
         rows.add(new int[] { 1, 2, 3, 4 });
         rows.add(new Object[] { 5, new Date(), 7, null, "字母", 9, 10.1243 });
-        excelUtil.write("test", Paths.get("d:/tmp"), new SimpleSheet<Object>(rows));
+        excelUtil.write(Paths.get("d:/tmp"), "test", new SimpleSheet<Object>(rows));
+    }
+
+    @Test
+    void 写出一个动态列() {
+        excelUtil.write(Paths.get("d:/tmp"), "test", new DynamicColumnListMapSheet<Object>() {
+            int page = 1;
+
+            @Override
+            protected List<Map<String, Object>> more() {
+                return getRows(page++);
+            }
+        }.setName("大量数据"));
     }
 
     /**
@@ -118,14 +130,14 @@ public class TestEec {
     @Test
     void 大数据量写动态表头() throws IOException {
         new Workbook()
-                .addSheet(new AppendKeyMapSheet<Object>() {
+                .addSheet(new DynamicColumnListMapSheet<Object>() {
                     int page = 1;
 
                     @Override
                     protected List<Map<String, Object>> more() {
                         return getRows(page++);
                     }
-                }.setSheetWriter(new AppendHeaderWorksheetWriter()))
+                }.setSheetWriter(new DynamicColumnWorksheetWriter()))
                 .writeTo(Paths.get("d:/tmp"));
     }
 

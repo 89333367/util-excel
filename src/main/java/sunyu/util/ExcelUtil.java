@@ -14,6 +14,8 @@ import org.ttzero.excel.reader.Row;
 
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
+import sunyu.util.config.DynamicColumnListMapSheet;
+import sunyu.util.config.DynamicColumnWorksheetWriter;
 
 /**
  * Excel文件工具类
@@ -95,11 +97,11 @@ public class ExcelUtil implements AutoCloseable {
     /**
      * 写入Excel文件
      *
-     * @param fileName Excel文件名
      * @param path     Excel文件路径
+     * @param fileName Excel文件名
      * @param consumer 内部workbook回调对象
      */
-    public void write(String fileName, Path path, Consumer<Workbook> consumer) {
+    public void write(Path path, String fileName, Consumer<Workbook> consumer) {
         try {
             Workbook wb = new Workbook(fileName); // 新增一个Workbook并指定名称，也就是Excel文件名
             wb.bestSpeed(); // 启用性能模式
@@ -113,12 +115,15 @@ public class ExcelUtil implements AutoCloseable {
     /**
      * 写入Excel文件
      *
-     * @param fileName Excel文件名
      * @param path     Excel文件路径
+     * @param fileName Excel文件名
      * @param sheet    工作表对象
      */
-    public void write(String fileName, Path path, Sheet sheet) {
-        write(fileName, path, wb -> {
+    public void write(Path path, String fileName, Sheet sheet) {
+        write(path, fileName, wb -> {
+            if (sheet instanceof DynamicColumnListMapSheet) {
+                sheet.setSheetWriter(new DynamicColumnWorksheetWriter());
+            }
             wb.addSheet(sheet);
         });
     }
