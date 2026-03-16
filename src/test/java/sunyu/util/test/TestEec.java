@@ -10,6 +10,7 @@ import org.ttzero.excel.reader.ExcelReader;
 import org.ttzero.excel.reader.Row;
 import org.ttzero.excel.reader.Sheet;
 import sunyu.util.ExcelUtil;
+import sunyu.util.config.AutoNumberedListMapSheet;
 import sunyu.util.config.DynamicColumnListMapSheet;
 import sunyu.util.config.DynamicColumnWorksheetWriter;
 import sunyu.util.test.pojo.FaHuo;
@@ -87,7 +88,7 @@ public class TestEec {
 
     @Test
     void 写出固定列() {
-        excelUtil.write(Paths.get("d:/tmp"), "test", new ListMapSheet<Object>() {
+        excelUtil.write(Paths.get("d:/tmp"), "test", new AutoNumberedListMapSheet<Object>() {
             int page = 1;
 
             @Override

@@ -16,7 +16,7 @@
     <groupId>sunyu.util</groupId>
     <artifactId>util-excel</artifactId>
     <!-- {eec.version}_{util.version}_{jdk.version} -->
-    <version>0.5.27_1.1_jdk8</version>
+    <version>0.5.27_1.2_jdk8</version>
     <classifier>shaded</classifier>
 </dependency>
 ```
@@ -90,7 +90,7 @@ void 写出一个动态列() {
 
 @Test
 void 写出固定列() {
-    excelUtil.write(Paths.get("d:/tmp"), "test", new ListMapSheet<Object>() {
+    excelUtil.write(Paths.get("d:/tmp"), "test", new AutoNumberedListMapSheet<Object>() {
         int page = 1;
 
         @Override
