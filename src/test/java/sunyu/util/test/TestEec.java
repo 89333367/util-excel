@@ -1,27 +1,23 @@
 package sunyu.util.test;
 
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
-
+import cn.hutool.log.Log;
+import cn.hutool.log.LogFactory;
 import org.junit.jupiter.api.Test;
+import org.ttzero.excel.entity.ListMapSheet;
 import org.ttzero.excel.entity.SimpleSheet;
 import org.ttzero.excel.entity.Workbook;
 import org.ttzero.excel.reader.ExcelReader;
 import org.ttzero.excel.reader.Row;
 import org.ttzero.excel.reader.Sheet;
-
-import cn.hutool.log.Log;
-import cn.hutool.log.LogFactory;
 import sunyu.util.ExcelUtil;
 import sunyu.util.config.DynamicColumnListMapSheet;
 import sunyu.util.config.DynamicColumnWorksheetWriter;
 import sunyu.util.test.pojo.FaHuo;
+
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.function.Consumer;
 
 public class TestEec {
     Log log = LogFactory.get();
@@ -57,9 +53,9 @@ public class TestEec {
     void 写出一个Sheet使用对象数组() {
         // 准备导出数据
         List<Object> rows = new ArrayList<>();
-        rows.add(new String[] { "列1", "列2", "列3" });
-        rows.add(new int[] { 1, 2, 3, 4 });
-        rows.add(new Object[] { 5, new Date(), 7, null, "字母", 9, 10.1243 });
+        rows.add(new String[]{"列1", "列2", "列3"});
+        rows.add(new int[]{1, 2, 3, 4});
+        rows.add(new Object[]{5, new Date(), 7, null, "字母", 9, 10.1243});
         excelUtil.write(Paths.get("d:/tmp"), "test", new SimpleSheet<Object>(rows));
     }
 
@@ -73,6 +69,18 @@ public class TestEec {
                 return getRows(page++);
             }
         }.setName("大量数据"));
+    }
+
+    @Test
+    void 写出固定列() {
+        excelUtil.write(Paths.get("d:/tmp"), "test", new ListMapSheet<Object>() {
+            int page = 1;
+
+            @Override
+            protected List<Map<String, Object>> more() {
+                return getRows(page++);
+            }
+        }.setName("固定列数据"));
     }
 
     /**
