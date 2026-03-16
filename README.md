@@ -53,6 +53,20 @@ void 读取一个excel自己处理细节() {
 }
 
 @Test
+void 读取一个excel自己处理细节2() {
+    excelUtil.read(Paths.get("d:/tmp/excel/2026016发货明细.xlsx"), excelReader -> excelReader
+            .sheet(0)
+            .asFullSheet()
+            .copyOnMerged() // <- 转为FullSheet并复制合并单元格
+            .header(1, 1)
+            .rows()
+            .map(Row::toMap)
+            .forEach(row -> {
+                log.debug("{}",row);
+            }));
+}
+
+@Test
 void 写出一个Sheet使用对象数组() {
     // 准备导出数据
     List<Object> rows = new ArrayList<>();
