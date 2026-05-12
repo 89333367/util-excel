@@ -136,11 +136,11 @@ public class TestEec {
 
     @Test
     void 读取第一个Sheet为map() {
-        try (ExcelReader reader = ExcelReader.read(Paths.get("d:/tmp/excel/2026016发货明细.xlsx"))) {
+        try (ExcelReader reader = ExcelReader.read(Paths.get("D:\\tmp\\发货明细\\20260318\\20260316-17发货明细.xlsx"))) {
             reader
                     .sheet(0)
-                    .asFullSheet()
-                    .copyOnMerged() // <- 转为FullSheet并复制合并单元格
+                    //.asFullSheet()
+                    //.copyOnMerged() // <- 转为FullSheet并复制合并单元格
                     .header(1)
                     .rows()
                     .map(Row::toMap)

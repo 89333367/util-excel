@@ -7,7 +7,7 @@
     <groupId>sunyu.util</groupId>
     <artifactId>util-excel</artifactId>
     <!-- {eec.version}_{util.version}_{jdk.version} -->
-    <version>0.5.27_1.2_jdk8</version>
+    <version>0.5.28_1.0_jdk8</version>
 
     <properties>
         <java.version>1.8</java.version>
@@ -42,7 +42,7 @@
         <dependency>
             <groupId>org.ttzero</groupId>
             <artifactId>eec</artifactId>
-            <version>0.5.27</version>
+            <version>0.5.28</version>
             <optional>true</optional>
         </dependency>
 
@@ -51,7 +51,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.14.3</version>
+            <version>5.14.4</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

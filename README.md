@@ -16,7 +16,7 @@
     <groupId>sunyu.util</groupId>
     <artifactId>util-excel</artifactId>
     <!-- {eec.version}_{util.version}_{jdk.version} -->
-    <version>0.5.27_1.2_jdk8</version>
+    <version>0.5.28_1.0_jdk8</version>
     <classifier>shaded</classifier>
 </dependency>
 ```
